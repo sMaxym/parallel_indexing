@@ -1,11 +1,15 @@
 #ifndef INDEXING_PARSING_H
 #define INDEXING_PARSING_H
 
+#include <string>
+#include <vector>
+#include <stdexcept>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 
 #include "concurqueue.h"
 
 void parse(const std::string &text, concur_queue<WORD_MAP> &output);
+void partition(const std::string &data, size_t n_parts, std::vector<std::string> &res);
 
 #endif //INDEXING_PARSING_H

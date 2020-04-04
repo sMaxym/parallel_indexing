@@ -6,7 +6,6 @@
 #include "./../header/cfg.h"
 #include "./../header/concurqueue.h"
 #include "./../header/dcomp.h"
-#include "./../header/text_edit.h"
 #include "./../header/parsing.h"
 
 int main(int argc, const char* argv[])
@@ -72,14 +71,13 @@ int main(int argc, const char* argv[])
     std::vector<std::string> indexing_blocks;
     partition(data, config.threads, indexing_blocks);
 
-    concur_queue<std::string> a;
-    for (const auto &val: indexing_blocks)
-        a.push(val);
+    concur_queue<std::string> input_blocks;
+    for (const auto &block: indexing_blocks)
+        input_blocks.push(block);
 
     concur_queue<WORD_MAP> counter;
-
-    while (a.get_size())
-        parse(a.pop(), counter);
+    while (input_blocks.get_size())
+        parse(input_blocks.pop(), counter);
 
     WORD_MAP cur_words, merge_words;
     while (counter.get_size() > 1)

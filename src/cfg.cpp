@@ -14,7 +14,7 @@ configuration_t read_conf(std::istream& cf)
     {
         std::vector<std::string> vector_names(4);
 
-        for (int i = 0; i < vector_names.size(); i++)
+        for (size_t i = 0; i < vector_names.size(); i++)
         {
             std::getline(cf, vector_names[i]);
             if (vector_names[i].length() == 0)

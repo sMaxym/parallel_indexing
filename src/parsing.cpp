@@ -14,3 +14,34 @@ void parse(const std::string &text, concur_queue<WORD_MAP> &output)
     }
     output.push(vocabulary);
 }
+
+void partition(const std::string &data, size_t n_parts, std::vector<std::string> &res)
+{
+    if (data.size() < n_parts)
+        throw std::invalid_argument("Size of an input string less than the amount of partitions");
+    const std::string delims = " \n\r\t";
+    size_t data_size = data.size();
+    size_t part_len = data_size / n_parts,
+            index = 0, cur_len;
+    int residual = data_size % n_parts;
+    char cur_symb;
+    for (size_t part = 1; part <= n_parts; ++part)
+    {
+        cur_len = part_len;
+        if (residual-- > 0)
+            cur_len++;
+        while (true)
+        {
+            if (index + cur_len >= data_size)
+                break;
+            cur_symb = data.at(index + cur_len - 1);
+            if (delims.find(cur_symb) != std::string::npos)
+                break;
+            cur_len++;
+        }
+        res.emplace_back(data.substr(index, cur_len));
+        index += cur_len;
+        if (index >= data_size - 1)
+            break;
+    }
+}
