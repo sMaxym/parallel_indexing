@@ -4,6 +4,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 
-int parse(std::basic_string<char>);
+#include "concurqueue.h"
+
+void parse(const std::string &text, concur_queue<WORD_MAP> &output);
 
 #endif //INDEXING_PARSING_H

@@ -7,6 +7,8 @@
 #include <mutex>
 #include <condition_variable>
 
+typedef std::map<std::string, size_t> WORD_MAP;
+
 template<class T>
 class concur_queue {
 private:

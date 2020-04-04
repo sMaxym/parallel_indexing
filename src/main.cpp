@@ -69,17 +69,36 @@ int main(int argc, const char* argv[])
 
     concur_queue<std::string> a;
     for (const auto &val: indexing_blocks)
-    {
         a.push(val);
-        std::cout << val << std::endl;
+
+    concur_queue<WORD_MAP> counter;
+
+
+
+    boost::locale::generator gen;
+    // Create system default locale
+    std::locale loc=gen("en_US.UTF-8");
+    //????? Make it system global
+    std::locale::global(loc);
+    std::cout.imbue(loc); //?? (making standard locale for cout)
+
+    size_t tick = 0;
+    for (std::string &block: indexing_blocks)
+    {
+        std::cout << tick << std::endl;
+        parse(block, counter);
+        tick++;
     }
 
-    parse(static_cast<std::string>(indexing_blocks[0]));
-
-
-    // run single/multiple thread indexing
-    // index(input_queue, output_queue, threads_num)
-    // ---
+    while (counter.get_size())
+    {
+        std::cout << "New map" << std::endl << std::endl;
+        WORD_MAP counter_part = counter.pop();
+        for (const auto& [key, value]: counter_part)
+        {
+            std::cout << key << " " << value << std::endl;
+        }
+    }
 
     return 0;
 }

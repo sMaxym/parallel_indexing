@@ -26,8 +26,7 @@ void decompress(const std::string &bin, std::string &res)
                 break;
             if (status != ARCHIVE_OK)
                 throw std::runtime_error("Error while decompressing archive");
-
-            res.append((char*)buff, size);
+            res.append(static_cast<const char*>(buff), size);
         } while (true);
     }
 
