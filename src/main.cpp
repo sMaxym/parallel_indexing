@@ -45,6 +45,11 @@ int main(int argc, const char* argv[])
         return 3;
     }
 
+    boost::locale::generator gen;
+    std::locale loc = gen("en_US.UTF-8");
+    std::locale::global(loc);
+    std::cout.imbue(loc);
+
 
     std::ifstream raw_file(config.in_file, std::ios::binary);
     auto buffer = [&raw_file] {
@@ -65,7 +70,7 @@ int main(int argc, const char* argv[])
     }
 
     std::vector<std::string> indexing_blocks;
-    partition(data, config.threads * 2, indexing_blocks);
+    partition(data, config.threads, indexing_blocks);
 
     concur_queue<std::string> a;
     for (const auto &val: indexing_blocks)
@@ -73,32 +78,22 @@ int main(int argc, const char* argv[])
 
     concur_queue<WORD_MAP> counter;
 
+    while (a.get_size())
+        parse(a.pop(), counter);
 
-
-    boost::locale::generator gen;
-    // Create system default locale
-    std::locale loc=gen("en_US.UTF-8");
-    //????? Make it system global
-    std::locale::global(loc);
-    std::cout.imbue(loc); //?? (making standard locale for cout)
-
-    size_t tick = 0;
-    for (std::string &block: indexing_blocks)
+    WORD_MAP cur_words, merge_words;
+    while (counter.get_size() > 1)
     {
-        std::cout << tick << std::endl;
-        parse(block, counter);
-        tick++;
+        cur_words = counter.pop();
+        merge_words = counter.pop();
+        for (const auto &[key, value]: merge_words)
+            cur_words[key] += value;
+        counter.push(cur_words);
     }
 
-    while (counter.get_size())
-    {
-        std::cout << "New map" << std::endl << std::endl;
-        WORD_MAP counter_part = counter.pop();
-        for (const auto& [key, value]: counter_part)
-        {
-            std::cout << key << " " << value << std::endl;
-        }
-    }
+    cur_words = counter.pop();
+    for (const auto &[key, value]: cur_words)
+        std::cout << key << " " << value << std::endl;
 
     return 0;
 }
