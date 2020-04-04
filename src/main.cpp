@@ -7,6 +7,7 @@
 #include "./../header/concurqueue.h"
 #include "./../header/dcomp.h"
 #include "./../header/text_edit.h"
+#include "./../header/parsing.h"
 
 int main(int argc, const char* argv[])
 {
@@ -45,7 +46,7 @@ int main(int argc, const char* argv[])
     }
 
 
-    std::ifstream raw_file(config.inFile, std::ios::binary);
+    std::ifstream raw_file(config.in_file, std::ios::binary);
     auto buffer = [&raw_file] {
                     std::ostringstream ss{};
                     ss << raw_file.rdbuf();
@@ -73,14 +74,12 @@ int main(int argc, const char* argv[])
         std::cout << val << std::endl;
     }
 
-    while (a.get_size())
-    {
-        std::cout << a.pop() << std::endl;
-    }
+    parse(static_cast<std::string>(indexing_blocks[0]));
+
 
     // run single/multiple thread indexing
     // index(input_queue, output_queue, threads_num)
-
+    // ---
 
     return 0;
 }
