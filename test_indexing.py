@@ -59,9 +59,7 @@ def compare_results(paths):
         with open(paths[file_num], "r") as f:
             for line in f:
                 # cut words (?)
-                sample = line
-                sample = sample.split("\t\t:\t")
-                sample[1] = sample[1].strip()
+                sample = line.split()
 
                 vocabs[file_num][sample[0]] = sample[1]
     # comparing all dicts
