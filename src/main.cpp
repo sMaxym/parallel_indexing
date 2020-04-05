@@ -71,17 +71,16 @@ int main(int argc, const char* argv[])
 
 
     std::vector<std::thread> index_threads;
+    std::atomic<long long> blocks_left = input_blocks.get_size() - 1;
     for (size_t thread_id = 0; thread_id < config.threads; ++thread_id)
     {
         index_threads.emplace_back(index_parallel, std::ref(input_blocks), std::ref(counter));
+        index_threads.emplace_back(merge_parallel, std::ref(counter), std::ref(blocks_left));
     }
-
     for (auto& th: index_threads)
     {
         th.join();
     }
-
-    merge_counter(counter);
     cur_words = counter.pop();
 
     time_indexing = to_us(get_current_time_fenced() - start_time_stamp);

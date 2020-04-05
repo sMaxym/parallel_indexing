@@ -20,6 +20,7 @@ public:
 
     void push(T d);
     T pop();
+    std::pair<T, T> pop2();
     size_t get_size();
 };
 

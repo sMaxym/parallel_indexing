@@ -13,5 +13,6 @@ void index_parallel(concur_queue<std::string> &input, concur_queue<WORD_MAP> &ou
 void parse(const std::string &text, concur_queue<WORD_MAP> &output);
 void partition(const std::string &data, size_t n_parts, std::vector<std::string> &res);
 void merge_counter(concur_queue<WORD_MAP> &counter);
+void merge_parallel(concur_queue<WORD_MAP> &counter, std::atomic<long long> &blocks_left);
 
 #endif //INDEXING_PARSING_H

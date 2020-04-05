@@ -64,3 +64,28 @@ void merge_counter(concur_queue<WORD_MAP> &counter)
         counter.push(cur_words);
     }
 }
+
+void merge_parallel(concur_queue<WORD_MAP> &counter, std::atomic<long long> &blocks_left)
+{
+    std::pair<WORD_MAP, WORD_MAP> to_merge;
+    WORD_MAP cur_words;
+    while (blocks_left)
+    {
+        blocks_left--;
+        to_merge = counter.pop2();
+        cur_words = to_merge.first;
+        for (const auto &[key, value]: to_merge.second)
+            cur_words[key] += value;
+        counter.push(cur_words);
+    }
+}
+
+
+
+
+
+
+
+
+
+
