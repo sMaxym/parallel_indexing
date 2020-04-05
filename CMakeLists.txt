@@ -14,8 +14,8 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
-set(LIBS ${LibArchive_LIBRARIES} ${Boost_LIBRARIES} ${Threads_LIBRARIES})
+set(LIBS ${LibArchive_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(indexing ${SOURCES})
-target_link_libraries(indexing ${LIBS} -lboost_system -lboost_filesystem -lboost_locale)
+target_link_libraries(indexing ${LIBS} Threads::Threads -lboost_system -lboost_filesystem -lboost_locale)
 
