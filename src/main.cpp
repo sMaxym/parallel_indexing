@@ -1,8 +1,10 @@
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cstring>
 #include <iomanip>
+#include <functional>
+#include <thread>
 
 #include "./../header/cfg.h"
 #include "./../header/concurqueue.h"
@@ -17,8 +19,9 @@ int main(int argc, const char* argv[])
 {
     long long time_reading, time_indexing, time_writing;
     configuration_t config;
-    std::string data = "";
+    std::string data = "", block;
     std::vector<std::string> indexing_blocks;
+    concur_queue<std::string> input_blocks;
     concur_queue<WORD_MAP> counter;
     WORD_MAP cur_words;
 
@@ -63,11 +66,21 @@ int main(int argc, const char* argv[])
 
     start_time_stamp = get_current_time_fenced();
     partition(data, config.threads, indexing_blocks);
-    concur_queue<std::string> input_blocks;
     for (const auto &block: indexing_blocks)
         input_blocks.push(block);
-    while (input_blocks.get_size())
-        parse(input_blocks.pop(), counter);
+
+
+    std::vector<std::thread> index_threads;
+    for (size_t thread_id = 0; thread_id < config.threads; ++thread_id)
+    {
+        index_threads.emplace_back(index_parallel, std::ref(input_blocks), std::ref(counter));
+    }
+
+    for (auto& th: index_threads)
+    {
+        th.join();
+    }
+
     merge_counter(counter);
     cur_words = counter.pop();
 

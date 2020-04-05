@@ -1,5 +1,11 @@
 #include "./../header/parsing.h"
 
+void index_parallel(concur_queue<std::string> &input, concur_queue<WORD_MAP> &output)
+{
+    while (input.get_size())
+        parse(input.pop(), output);
+}
+
 void parse(const std::string &text, concur_queue<WORD_MAP> &output)
 {
     std::string word;

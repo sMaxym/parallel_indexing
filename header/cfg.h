@@ -9,7 +9,7 @@
 struct configuration_t
 {
     std::string in_file, out_file1, out_file2;
-    int threads;
+    size_t threads;
 };
 
 // exception structure when there is no tab in row
