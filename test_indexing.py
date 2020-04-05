@@ -40,7 +40,7 @@ def extract_time(output):
     str -> float
     """
     try:
-        temp = "Total: "
+        temp = "Total:\t\t"
         inx = output.index(temp)
         output = float(output[inx + len(temp):])
     except ValueError:
@@ -99,9 +99,9 @@ def main(num_repeat, config_file="config.dat"):
         # comparing res if it is not the first one
         if os.path.exists(temp_output):
             compare_results([temp_output, orig_output])
-        # interchanging res
-        save_new_res(orig_output, temp_output)
-    return "Results are equal\n Min time:\t{}".format(min(min_time_list))
+            # interchanging res
+            save_new_res(orig_output, temp_output)
+    return "Results are equal\nMin time:\t{}".format(min(min_time_list))
 
 
 if __name__ == "__main__":
@@ -111,12 +111,12 @@ if __name__ == "__main__":
             raise IndexError
 
         if len(sys.argv) == 2:
-            main(num_rep)
+            print(main(num_rep))
         elif len(sys.argv) == 3:
             name_config = sys.argv[2]
             if not os.path.exists(name_config):
                 raise FileNotFoundError
-            main(num_rep, name_config)
+            print(main(num_rep, name_config))
         else:
             raise TypeError
     except (IndexError, ValueError) as err:
