@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <sstream>
 #include <cstring>
 #include <iomanip>
 #include <functional>
@@ -19,7 +18,7 @@ int main(int argc, const char* argv[])
 {
     long long time_reading, time_indexing, time_writing;
     configuration_t config;
-    std::string data = "", block;
+    std::string data, block;
     std::vector<std::string> indexing_blocks;
     concur_queue<std::string> input_blocks;
     concur_queue<WORD_MAP> counter;
@@ -66,8 +65,8 @@ int main(int argc, const char* argv[])
 
     start_time_stamp = get_current_time_fenced();
     partition(data, config.threads, indexing_blocks);
-    for (const auto &block: indexing_blocks)
-        input_blocks.push(block);
+    for (const auto &block_: indexing_blocks)
+        input_blocks.push(block_);
 
 
     std::vector<std::thread> index_threads;
@@ -106,9 +105,9 @@ int main(int argc, const char* argv[])
 
     // ------------------------------------------------------
 
-    std::cout << "Loading:\t" << time_reading * sec_factor << std::endl <<
-                 "Analyzing:\t" << time_indexing * sec_factor << std::endl <<
-                 "Total:\t\t" << (time_reading + time_indexing + time_writing) * sec_factor << std::endl;
+    std::cout << "Loading:\t" << static_cast<double>(time_reading) * sec_factor << std::endl <<
+                 "Analyzing:\t" << static_cast<double>(time_indexing) * sec_factor << std::endl <<
+                 "Total:\t\t" << static_cast<double>(time_reading + time_indexing + time_writing) * sec_factor << std::endl;
 
     return 0;
 }

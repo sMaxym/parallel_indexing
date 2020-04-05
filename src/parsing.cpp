@@ -29,7 +29,7 @@ void partition(const std::string &data, size_t n_parts, std::vector<std::string>
     size_t data_size = data.size();
     size_t part_len = data_size / n_parts,
             index = 0, cur_len;
-    int residual = data_size % n_parts;
+    int residual = static_cast<int>(data_size % n_parts);
     char cur_symb;
     for (size_t part = 1; part <= n_parts; ++part)
     {
