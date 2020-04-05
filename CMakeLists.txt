@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(LibArchive REQUIRED)
+find_package(Threads REQUIRED)
 find_package(Boost REQUIRED)
 
 file(GLOB SOURCES
@@ -13,5 +14,8 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
+set(LIBS ${LibArchive_LIBRARIES} ${Boost_LIBRARIES} ${Threads_LIBRARIES})
+
 add_executable(indexing ${SOURCES})
-target_link_libraries(indexing ${LibArchive_LIBRARIES} ${Boost_LIBRARIES} -lboost_system -lboost_filesystem -lboost_locale)
+target_link_libraries(indexing ${LIBS} -lboost_system -lboost_filesystem -lboost_locale)
+
