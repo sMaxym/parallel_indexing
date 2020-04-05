@@ -11,5 +11,6 @@
 
 void parse(const std::string &text, concur_queue<WORD_MAP> &output);
 void partition(const std::string &data, size_t n_parts, std::vector<std::string> &res);
+void merge_counter(concur_queue<WORD_MAP> &counter);
 
 #endif //INDEXING_PARSING_H

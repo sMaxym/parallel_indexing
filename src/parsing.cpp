@@ -5,7 +5,7 @@ void parse(const std::string &text, concur_queue<WORD_MAP> &output)
     std::string word;
     std::map<std::string, size_t> vocabulary;
     boost::locale::boundary::ssegment_index myMap(boost::locale::boundary::word,text.begin(),text.end());
-    myMap.rule(boost::locale::boundary::word_any);
+    myMap.rule(boost::locale::boundary::word_letters);
     for (const auto &x: myMap)
     {
         word = boost::locale::normalize(std::string(x), boost::locale::norm_default);
@@ -43,5 +43,18 @@ void partition(const std::string &data, size_t n_parts, std::vector<std::string>
         index += cur_len;
         if (index >= data_size - 1)
             break;
+    }
+}
+
+void merge_counter(concur_queue<WORD_MAP> &counter)
+{
+    WORD_MAP cur_words, merge_words;
+    while (counter.get_size() > 1)
+    {
+        cur_words = counter.pop();
+        merge_words = counter.pop();
+        for (const auto &[key, value]: merge_words)
+            cur_words[key] += value;
+        counter.push(cur_words);
     }
 }

@@ -2,46 +2,33 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <iomanip>
 
 #include "./../header/cfg.h"
 #include "./../header/concurqueue.h"
 #include "./../header/dcomp.h"
 #include "./../header/parsing.h"
+#include "./../header/timer.h"
+
+template<typename Key, typename Value>
+std::multimap<Key, Value> swap_map(const std::map<Value, Key>& values);
 
 int main(int argc, const char* argv[])
 {
-    if (argc > 2)
-    {
-        std::cout << "Argument error" << std::endl;
-        return 1;
-    }
+    long long time_reading, time_indexing, time_writing;
+    configuration_t config;
+    std::string data = "";
+    std::vector<std::string> indexing_blocks;
+    concur_queue<WORD_MAP> counter;
+    WORD_MAP cur_words;
 
-    // naming config file
-    std::string confFileName;
-    if (argc == 2)
-    {
-        confFileName = argv[1];
-    } else{
-        confFileName = "../config.dat";
-    }
-
-    // attempt to open config file
-    std::ifstream config_stream(confFileName);
-    if(!config_stream.is_open()) {
-        std::cerr << "Failed to open configuration file " << confFileName << std::endl;
-        return 2;
-    }
-
-    // configuration process with data structure configuration
-    // that contains inputFileName, outputFileName, number of threads
-    configuration_t config {};
     try
     {
-        config = read_conf(config_stream);
-    }catch (std::exception& ex)
+        config = init(argc, argv);
+    } catch (std::runtime_error &e)
     {
-        std::cerr << "Error: " << ex.what() << std::endl;
-        return 3;
+        std::cout << "Runtime exception: " << e.what() << std::endl;
+        return 1;
     }
 
     boost::locale::generator gen;
@@ -50,6 +37,9 @@ int main(int argc, const char* argv[])
     std::cout.imbue(loc);
 
 
+    // READING AND DECOMPRESSING ----------------------------
+
+    auto start_time_stamp = get_current_time_fenced();
     std::ifstream raw_file(config.in_file, std::ios::binary);
     auto buffer = [&raw_file] {
                     std::ostringstream ss{};
@@ -58,40 +48,64 @@ int main(int argc, const char* argv[])
                 } ();
     raw_file.close();
 
-    std::string data = "";
-
     try
     {
         decompress(buffer, data);
-    } catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e)
+    {
         std::cout << "Error while trying to decompress input archive" << std::endl;
         return 1;
     }
 
-    std::vector<std::string> indexing_blocks;
-    partition(data, config.threads, indexing_blocks);
+    time_reading = to_us(get_current_time_fenced() - start_time_stamp);
 
+    // INDEXING ---------------------------------------------
+
+    start_time_stamp = get_current_time_fenced();
+    partition(data, config.threads, indexing_blocks);
     concur_queue<std::string> input_blocks;
     for (const auto &block: indexing_blocks)
         input_blocks.push(block);
-
-    concur_queue<WORD_MAP> counter;
     while (input_blocks.get_size())
         parse(input_blocks.pop(), counter);
-
-    WORD_MAP cur_words, merge_words;
-    while (counter.get_size() > 1)
-    {
-        cur_words = counter.pop();
-        merge_words = counter.pop();
-        for (const auto &[key, value]: merge_words)
-            cur_words[key] += value;
-        counter.push(cur_words);
-    }
-
+    merge_counter(counter);
     cur_words = counter.pop();
-    for (const auto &[key, value]: cur_words)
-        std::cout << key << " " << value << std::endl;
+
+    time_indexing = to_us(get_current_time_fenced() - start_time_stamp);
+
+    // WRITING ----------------------------------------------
+
+    start_time_stamp = get_current_time_fenced();
+
+    std::ofstream output(config.out_file1, std::fstream::out);
+    for (const auto& [key, value]: cur_words)
+        output << std::setw(20) << std::left << key <<
+                  std::setw(20) << std::left << value << std::endl;
+    output.close();
+
+    output.open(config.out_file2, std::fstream::out);
+    std::multimap<size_t, std::string> words_by_amount = swap_map(cur_words);
+    for (auto it = words_by_amount.rbegin(); it != words_by_amount.rend(); ++it)
+        output << std::setw(20) << std::left << it->second <<
+                  std::setw(20) << std::left << it->first << std::endl;
+    output.close();
+
+    time_writing = to_us(get_current_time_fenced() - start_time_stamp);
+
+    // ------------------------------------------------------
+
+    std::cout << "Loading:\t" << time_reading * sec_factor << std::endl <<
+                 "Analyzing:\t" << time_indexing * sec_factor << std::endl <<
+                 "Total:\t\t" << (time_reading + time_indexing + time_writing) * sec_factor << std::endl;
 
     return 0;
+}
+
+template<typename Key, typename Value>
+std::multimap<Key, Value> swap_map(const std::map<Value, Key>& values)
+{
+    std::multimap<Key, Value> result;
+    for (const auto& [key, value]: values)
+        result.insert(std::pair<Key, Value>(value, key));
+    return result;
 }

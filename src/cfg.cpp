@@ -1,6 +1,20 @@
 #include "./../header/cfg.h"
 
-// function that makes configuration and entry error handling
+configuration_t init(const int& argc, const char* argv[])
+{
+    if (argc > 2)
+        throw std::runtime_error("Argument error");
+    std::string cfg_filepath;
+    cfg_filepath = argc == 2 ? argv[1] : "../config.dat";
+    std::ifstream config_stream(cfg_filepath);
+    if(!config_stream.is_open())
+        throw std::runtime_error("Failed to open configuration file " + cfg_filepath);
+    configuration_t config {};
+    config = read_conf(config_stream);
+    config_stream.close();
+    return config;
+}
+
 configuration_t read_conf(std::istream& cf)
 {
     std::ios::fmtflags flags( cf.flags() ); // Save stream state

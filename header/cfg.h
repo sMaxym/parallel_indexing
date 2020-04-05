@@ -39,6 +39,7 @@ struct no_line_exception : public std::exception
     }
 };
 
+configuration_t init(const int& argc, const char* argv[]);
 configuration_t read_conf(std::istream& cf);
 
 #endif // CFG_H
